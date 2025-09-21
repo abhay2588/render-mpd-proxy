@@ -5,7 +5,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // 🔗 Replace with your real MPD URL
-const mpdUrl = 'https://linearjitp-playback.astro.com.my/dash-wv/linear/2504/default_primary.mpd';
+const mpdUrl = 'https://linearjitp-playback.astro.com.my/dash-wv/linear/2504/default_ott.mpd';
 
 app.get('/', async (req, res) => {
   try {
