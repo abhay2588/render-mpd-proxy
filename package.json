@@ -1,0 +1,13 @@
+{
+  "name": "mpd-proxy",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2",
+    "express": "^4.19.2"
+  },
+  "type": "module"
+}
