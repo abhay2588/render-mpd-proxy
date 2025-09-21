@@ -4,12 +4,22 @@ import fetch from 'node-fetch';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 🔗 Replace with your real MPD URL
-const mpdUrl = 'https://linearjitp-playback.astro.com.my/dash-wv/linear/2504/default_ott.mpd';
+// Base upstream URL
+const upstreamBase = 'https://linearjitp-playback.astro.com.my/dash-wv/linear/';
 
-app.get('/', async (req, res) => {
+app.get('*', async (req, res) => {
   try {
-    const upstream = await fetch(mpdUrl, {
+    // Either use query ?get= or the path itself
+    let path = req.query.get || req.path.substring(1); // remove leading /
+
+    if (!path) {
+      res.status(400).send('No MPD path specified');
+      return;
+    }
+
+    const upstreamUrl = upstreamBase + path;
+
+    const upstream = await fetch(upstreamUrl, {
       headers: {
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
@@ -21,7 +31,10 @@ app.get('/', async (req, res) => {
       return;
     }
 
-    res.set('Content-Type', 'application/dash+xml');
+    // Set correct content type
+    const headers = { 'Content-Type': upstreamUrl.endsWith('.mpd') ? 'application/dash+xml' : 'video/iso.segment' };
+    res.set(headers);
+
     upstream.body.pipe(res);
   } catch (err) {
     console.error(err);
@@ -29,6 +42,4 @@ app.get('/', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Listening on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
