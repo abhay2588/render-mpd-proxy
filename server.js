@@ -7,15 +7,13 @@ const PORT = process.env.PORT || 3000;
 // Base upstream URL
 const upstreamBase = 'https://linearjitp-playback.astro.com.my/dash-wv/linear/';
 
+// Default MPD path if none provided
+const defaultMPD = 'channel123/manifest.mpd';
+
 app.get('*', async (req, res) => {
   try {
-    // Either use query ?get= or the path itself
-    let path = req.query.get || req.path.substring(1); // remove leading /
-
-    if (!path) {
-      res.status(400).send('No MPD path specified');
-      return;
-    }
+    // Use ?get= parameter or path, fallback to default
+    let path = req.query.get || req.path.substring(1) || defaultMPD;
 
     const upstreamUrl = upstreamBase + path;
 
@@ -31,8 +29,10 @@ app.get('*', async (req, res) => {
       return;
     }
 
-    // Set correct content type
-    const headers = { 'Content-Type': upstreamUrl.endsWith('.mpd') ? 'application/dash+xml' : 'video/iso.segment' };
+    // Set correct content type for MPD and segments
+    const headers = {
+      'Content-Type': upstreamUrl.endsWith('.mpd') ? 'application/dash+xml' : 'video/iso.segment'
+    };
     res.set(headers);
 
     upstream.body.pipe(res);
